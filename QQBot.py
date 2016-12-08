@@ -182,18 +182,18 @@ def msg_handler(msgObj):
             gid = msg['value']['group_code']
             tuin = msg['value']['send_uin']
             seq = msg['value']['msg_id']
-            if str(gid) in GroupWatchList:
-                g_exist = group_thread_exist(gid)
-                if g_exist:
-                    g_exist.handle(tuin, txt, seq)
-                else:
-                    tmpThread = group_thread(guin, gid)
-                    tmpThread.start()
-                    GroupThreadList.append(tmpThread)
-                    tmpThread.handle(tuin, txt, seq)
-                    logging.info("群线程已生成")
+            #if str(gid) in GroupWatchList:
+            g_exist = group_thread_exist(gid)
+            if g_exist:
+                g_exist.handle(tuin, txt, seq)
             else:
-                logging.info(str(gid) + "群有动态，但是没有被监控")
+                tmpThread = group_thread(guin, gid)
+                tmpThread.start()
+                GroupThreadList.append(tmpThread)
+                tmpThread.handle(tuin, txt, seq)
+                logging.info("群线程已生成")
+            #else:
+            #    logging.info(str(gid) + "群有动态，但是没有被监控")
 
             # from_account = uin_to_account(tuin)
             # print "{0}:{1}".format(from_account, txt)
@@ -579,6 +579,7 @@ class group_thread(threading.Thread):
 
     def handle(self, send_uin, content, seq):
         # 避免重复处理相同信息
+        logging.debug(content)
         if seq != self.lastseq:
             pattern = re.compile(r'^(?:!|！)(learn|delete) {(.+)}{(.+)}')
             match = pattern.match(content)
@@ -673,7 +674,7 @@ class group_thread(threading.Thread):
             logging.info("读取存档出错:"+str(e))
     
     def callout(self, send_uin, content):
-        pattern = re.compile(r'^(?:!|！)(ai) (.+)') 
+        pattern = re.compile(r'^(?:\@)(tooWeak) (.+)') 
         match = pattern.match(content)
         try:
             if match:
